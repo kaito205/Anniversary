@@ -1907,26 +1907,52 @@ html, body {
 /* =======================================================
 *   Interactive Gallery & Cinema Lightbox Styling
 * ======================================================= */
+/* Ensure Section Headings & Titles are not covered by fixed top header */
+#qbootstrap-gallery,
+#qbootstrap-couple,
+#qbootstrap-groom-bride,
+#qbootstrap-story,
+#qbootstrap-testimonials {
+  padding-top: 100px !important;
+  scroll-margin-top: 80px !important;
+}
+
+@media screen and (max-width: 768px) {
+  #qbootstrap-gallery,
+  #qbootstrap-couple,
+  #qbootstrap-groom-bride,
+  #qbootstrap-story,
+  #qbootstrap-testimonials {
+    padding-top: 110px !important;
+  }
+}
+
+/* =======================================================
+*   Interactive Gallery & Cinema Lightbox Styling
+* ======================================================= */
 .gallery-filter-tabs {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 15px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
 }
 
 .gallery-tab-btn {
   background: #ffffff;
-  border: 2px solid rgba(241, 78, 149, 0.25);
+  border: 1.5px solid rgba(241, 78, 149, 0.3);
   color: #555555;
-  padding: 8px 22px;
-  border-radius: 30px;
+  padding: 7px 18px;
+  border-radius: 24px;
   font-weight: 600;
-  font-size: 15px;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   outline: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  white-space: nowrap;
 }
 
 .gallery-tab-btn:hover,
@@ -1934,8 +1960,59 @@ html, body {
   background: #f14e95;
   color: #ffffff;
   border-color: #f14e95;
-  box-shadow: 0 4px 15px rgba(241, 78, 149, 0.35);
+  box-shadow: 0 3px 12px rgba(241, 78, 149, 0.35);
   transform: translateY(-2px);
+}
+
+.gallery-action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+  margin-bottom: 25px;
+}
+
+.add-media-btn {
+  border-radius: 22px !important;
+  border: none !important;
+  font-weight: bold !important;
+  padding: 9px 20px !important;
+  font-size: 13px !important;
+  cursor: pointer !important;
+  transition: all 0.25s ease !important;
+  white-space: nowrap !important;
+}
+
+.add-media-btn.photo-btn {
+  background: #f14e95 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(241, 78, 149, 0.35) !important;
+}
+
+.add-media-btn.video-btn {
+  background: #222222 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
+}
+
+.add-media-btn:hover {
+  transform: translateY(-2px) scale(1.03) !important;
+}
+
+@media screen and (max-width: 480px) {
+  .gallery-filter-tabs {
+    gap: 5px;
+  }
+  .gallery-tab-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 18px;
+  }
+  .add-media-btn {
+    padding: 8px 15px !important;
+    font-size: 12px !important;
+  }
 }
 
 .interactive-gallery-card {
