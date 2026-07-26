@@ -1006,6 +1006,9 @@ song
 		import { 
 			getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp 
 		} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+		import {
+			getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL
+		} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 		const firebaseConfig = {
 			apiKey: "AIzaSyCdmUgdmHjrG212jlixWf6K4DnckhAkHIk",
@@ -1436,6 +1439,64 @@ song
 			}
 		});
 
+		const storage = getStorage(app);
+
+		async function uploadVideoToCloud(file, progressCallback) {
+			try {
+				const filename = 'videos/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+				const fileRef = storageRef(storage, filename);
+				const uploadTask = uploadBytesResumable(fileRef, file);
+
+				return new Promise((resolve, reject) => {
+					uploadTask.on('state_changed', 
+						(snapshot) => {
+							const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+							if (progressCallback) progressCallback(progress);
+						}, 
+						(error) => {
+							console.warn("Firebase Storage fallback to Cloud API...", error);
+							uploadToCatboxCloud(file, progressCallback).then(resolve).catch(reject);
+						}, 
+						async () => {
+							const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+							resolve(downloadURL);
+						}
+					);
+				});
+			} catch (e) {
+				return uploadToCatboxCloud(file, progressCallback);
+			}
+		}
+
+		async function uploadToCatboxCloud(file, progressCallback) {
+			return new Promise((resolve, reject) => {
+				const formData = new FormData();
+				formData.append('reqtype', 'fileupload');
+				formData.append('fileToUpload', file);
+
+				const xhr = new XMLHttpRequest();
+				xhr.open('POST', 'https://catbox.moe/user/api.php', true);
+
+				xhr.upload.onprogress = (e) => {
+					if (e.lengthComputable && progressCallback) {
+						const percent = Math.round((e.loaded / e.total) * 100);
+						progressCallback(percent);
+					}
+				};
+
+				xhr.onload = () => {
+					if (xhr.status === 200 && xhr.responseText.trim().startsWith('http')) {
+						resolve(xhr.responseText.trim());
+					} else {
+						reject(new Error("Gagal mengunggah file video ke server cloud."));
+					}
+				};
+
+				xhr.onerror = () => reject(new Error("Koneksi terputus saat mengunggah video ke cloud."));
+				xhr.send(formData);
+			});
+		}
+
 		window.openAddMedia = function(type) {
 			const isPhoto = type === 'photo';
 			let fields = '';
@@ -1460,14 +1521,14 @@ song
 							document.getElementById('videoFileInputBlock').style.display = isFile ? 'block' : 'none';
 							document.getElementById('videoUrlInputBlock').style.display = isFile ? 'none' : 'block';
 						">
-							<option value="file">📁 Upload File Video dari HP / Laptop (Bebas Ukuran Berapa Saja)</option>
-							<option value="url">🔗 Input Link Video (Google Drive / YouTube / Direct Link MP4)</option>
+							<option value="file">📁 Upload File Video dari HP / Laptop (Otomatis Tersimpan di Cloud)</option>
+							<option value="url">🔗 Input Link Video (Google Drive / YouTube / Direct MP4)</option>
 						</select>
 					</div>
 					<div class="form-group" id="videoFileInputBlock">
 						<label style="color: #444; font-weight: bold;">Pilih File Video (.mp4 / video HP):</label>
 						<input type="file" id="addMediaFile" class="form-control" accept="video/*" style="border-radius: 8px; padding: 5px;">
-						<small style="color: #888;">*Bisa upload video durasi panjang &amp; ukuran besar (5MB, 20MB, 50MB+) dari galeri HP Anda.</small>
+						<small style="color: #888;">*Video akan otomatis diunggah ke server cloud dan diputar di semua HP secara permanen.</small>
 					</div>
 					<div class="form-group" id="videoUrlInputBlock" style="display: none;">
 						<label style="color: #444; font-weight: bold;">Paste URL / Link Video:</label>
@@ -1508,23 +1569,29 @@ song
 							return;
 						}
 						const file = fileInput.files[0];
-						const vidKey = 'vid_local_' + Date.now();
+						const submitBtn = document.getElementById("submitQuickModal");
 
-						const reader = new FileReader();
-						reader.onload = async (e) => {
-							const dataUrl = e.target.result;
-							await saveVideoToDB(vidKey, dataUrl);
+						if (submitBtn) {
+							submitBtn.disabled = true;
+							submitBtn.innerText = "Mengunggah 0%...";
+						}
+
+						try {
+							// Upload file directly to Cloud Storage (Plays on ALL devices!)
+							const cloudUrl = await uploadVideoToCloud(file, (percent) => {
+								if (submitBtn) submitBtn.innerText = `Mengunggah ${percent}%...`;
+							});
 
 							await addDoc(galleryRef, {
 								type: 'video',
-								storageType: 'indexeddb',
-								localKey: vidKey,
-								url: dataUrl.length < 500000 ? dataUrl : '',
+								storageType: 'url',
+								url: cloudUrl,
 								title: title || file.name.replace(/\.[^/.]+$/, ""),
 								timestamp: serverTimestamp()
 							});
-						};
-						reader.readAsDataURL(file);
+						} catch (err) {
+							alert("Gagal mengunggah video ke cloud: " + err.message);
+						}
 					} else {
 						const urlInput = document.getElementById("addMediaUrl");
 						const videoUrl = urlInput ? urlInput.value.trim() : '';
