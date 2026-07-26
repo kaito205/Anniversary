@@ -1701,7 +1701,86 @@ song
 		function escapeHtml(text) {
 			if (!text) return "";
 			return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-		}
+	<!-- Romantic Floating Sakura Petals & Heart Particles Engine -->
+	<script>
+		(function() {
+			const canvas = document.createElement('canvas');
+			canvas.id = 'sakuraHeartCanvas';
+			canvas.style.position = 'fixed';
+			canvas.style.top = '0';
+			canvas.style.left = '0';
+			canvas.style.width = '100%';
+			canvas.style.height = '100%';
+			canvas.style.pointerEvents = 'none';
+			canvas.style.zIndex = '9999';
+			document.body.appendChild(canvas);
+
+			const ctx = canvas.getContext('2d');
+			let width = canvas.width = window.innerWidth;
+			let height = canvas.height = window.innerHeight;
+
+			window.addEventListener('resize', () => {
+				width = canvas.width = window.innerWidth;
+				height = canvas.height = window.innerHeight;
+			});
+
+			const particles = [];
+			const symbols = ['🌸', '💖', '🌸', '💕', '🌸', '❤️', '✨'];
+
+			class Particle {
+				constructor() {
+					this.reset(true);
+				}
+
+				reset(initial = false) {
+					this.x = Math.random() * width;
+					this.y = initial ? Math.random() * height : height + 30;
+					this.size = Math.random() * 12 + 12; // 12px to 24px
+					this.speedY = Math.random() * 0.7 + 0.3;
+					this.speedX = (Math.random() - 0.5) * 0.4;
+					this.opacity = Math.random() * 0.5 + 0.35;
+					this.symbol = symbols[Math.floor(Math.random() * symbols.length)];
+					this.angle = Math.random() * Math.PI * 2;
+					this.angularSpeed = (Math.random() - 0.5) * 0.02;
+				}
+
+				update() {
+					this.y -= this.speedY;
+					this.angle += this.angularSpeed;
+					this.x += Math.sin(this.angle) * 0.5 + this.speedX;
+
+					if (this.y < -30 || this.x < -30 || this.x > width + 30) {
+						this.reset(false);
+					}
+				}
+
+				draw() {
+					ctx.save();
+					ctx.globalAlpha = this.opacity;
+					ctx.font = `${this.size}px serif`;
+					ctx.translate(this.x, this.y);
+					ctx.rotate(this.angle);
+					ctx.fillText(this.symbol, 0, 0);
+					ctx.restore();
+				}
+			}
+
+			const particleCount = window.innerWidth < 768 ? 18 : 32;
+			for (let i = 0; i < particleCount; i++) {
+				particles.push(new Particle());
+			}
+
+			function animate() {
+				ctx.clearRect(0, 0, width, height);
+				particles.forEach(p => {
+					p.update();
+					p.draw();
+				});
+				requestAnimationFrame(animate);
+			}
+
+			animate();
+		})();
 	</script>
 
 	</body>
