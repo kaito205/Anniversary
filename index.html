@@ -654,7 +654,7 @@ song
 	<div id="cinemaVideoModal" class="cinema-video-modal" onclick="closeCinemaModal(event)">
 		<div class="cinema-video-content" onclick="event.stopPropagation()">
 			<button class="cinema-close-btn" onclick="closeCinemaModal(event)">&times;</button>
-			<video id="cinemaVideoPlayer" controls autoplay preload="metadata">
+			<video id="cinemaVideoPlayer" controls autoplay playsinline webkit-playsinline preload="auto">
 				<source id="cinemaVideoSource" src="" type="video/mp4">
 			</video>
 			<div class="cinema-video-footer">
@@ -1083,12 +1083,12 @@ song
 			});
 		}
 
-		async function saveVideoToDB(id, blob) {
+		async function saveVideoToDB(id, dataUrlOrBlob) {
 			const db = await openVideoDB();
 			return new Promise((resolve, reject) => {
 				const tx = db.transaction("videoBlobs", "readwrite");
 				const store = tx.objectStore("videoBlobs");
-				store.put({ id: id, blob: blob, timestamp: Date.now() });
+				store.put({ id: id, data: dataUrlOrBlob, timestamp: Date.now() });
 				tx.oncomplete = () => resolve(true);
 				tx.onerror = (e) => reject(e.target.error);
 			});
@@ -1102,8 +1102,16 @@ song
 					const store = tx.objectStore("videoBlobs");
 					const req = store.get(id);
 					req.onsuccess = () => {
-						if (req.result && req.result.blob) {
-							resolve(URL.createObjectURL(req.result.blob));
+						if (req.result) {
+							if (typeof req.result.data === 'string') {
+								resolve(req.result.data);
+							} else if (req.result.data instanceof Blob) {
+								resolve(URL.createObjectURL(req.result.data));
+							} else if (req.result.blob) {
+								resolve(URL.createObjectURL(req.result.blob));
+							} else {
+								resolve(null);
+							}
 						} else {
 							resolve(null);
 						}
@@ -1347,7 +1355,7 @@ song
 						<button class="hover-delete-btn" title="Hapus Video Ini" onclick="deleteDefaultItem(event, '${cardId}')">✕</button>
 						<div class="video-play-overlay" onclick="openCinemaModal('${v.url}', '${v.title}')">
 							<button class="card-love-btn" onclick="likeCardItem(event, this, '${cardId}')">❤️ <span class="like-count">${likes}</span></button>
-							<video preload="metadata" poster="${v.poster}" muted>
+							<video preload="auto" muted playsinline webkit-playsinline loop autoplay>
 								<source src="${v.url}" type="video/mp4">
 							</video>
 							<div class="video-play-btn-badge">▶</div>
@@ -1377,22 +1385,19 @@ song
 					`;
 				} else if (data.type === 'video') {
 					const isIndexedDB = data.storageType === 'indexeddb';
-					const rawUrl = data.url || '';
-					// Ignore expired blob URLs from previous browser sessions
-					const initialSrc = (rawUrl.startsWith('blob:') && !isIndexedDB) ? '' : escapeHtml(rawUrl);
-					const defaultPoster = 'images/me-and-you.jpg';
+					const vidSrc = escapeHtml(data.url || '');
 
 					videoHtml += `
 						<div class="col-md-6 col-sm-12 col-xs-12 fadeInUp animated-fast hover-edit-container" id="cardWrap_${id}">
 							<button class="hover-delete-btn" title="Hapus Video" onclick="deleteItem('gallery', '${id}')">✕</button>
 							<div class="video-play-overlay" id="vidCard_${id}" onclick="
-								const srcEl = this.querySelector('video source');
-								const playUrl = (srcEl && srcEl.src) ? srcEl.src : '${initialSrc}';
+								const srcTag = this.querySelector('video source');
+								const playUrl = (srcTag && srcTag.src && srcTag.src.length > 5) ? srcTag.src : '${vidSrc}';
 								openCinemaModal(playUrl, '${escapeHtml(data.title || 'Video Kenangan')}');
 							">
 								<button class="card-love-btn" onclick="likeCardItem(event, this, '${id}')">❤️ <span class="like-count">${likes}</span></button>
-								<video preload="metadata" poster="${defaultPoster}" muted>
-									<source src="${initialSrc}" type="video/mp4">
+								<video id="vidElem_${id}" preload="auto" muted playsinline webkit-playsinline loop autoplay>
+									<source id="vidSrc_${id}" src="${vidSrc}" type="video/mp4">
 								</video>
 								<div class="video-play-btn-badge">▶</div>
 								<div class="video-card-caption">🎬 ${escapeHtml(data.title || 'Video Kenangan')}</div>
@@ -1501,19 +1506,22 @@ song
 						}
 						const file = fileInput.files[0];
 						const vidKey = 'vid_local_' + Date.now();
-						const localUrl = URL.createObjectURL(file);
 
-						// Save blob to IndexedDB for high-capacity local playback
-						await saveVideoToDB(vidKey, file);
+						const reader = new FileReader();
+						reader.onload = async (e) => {
+							const dataUrl = e.target.result;
+							await saveVideoToDB(vidKey, dataUrl);
 
-						await addDoc(galleryRef, {
-							type: 'video',
-							storageType: 'indexeddb',
-							localKey: vidKey,
-							url: localUrl,
-							title: title || file.name.replace(/\.[^/.]+$/, ""),
-							timestamp: serverTimestamp()
-						});
+							await addDoc(galleryRef, {
+								type: 'video',
+								storageType: 'indexeddb',
+								localKey: vidKey,
+								url: dataUrl.length < 500000 ? dataUrl : '',
+								title: title || file.name.replace(/\.[^/.]+$/, ""),
+								timestamp: serverTimestamp()
+							});
+						};
+						reader.readAsDataURL(file);
 					} else {
 						const urlInput = document.getElementById("addMediaUrl");
 						const videoUrl = urlInput ? urlInput.value.trim() : '';
