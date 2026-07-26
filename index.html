@@ -1728,7 +1728,7 @@ song
 			});
 
 			const particles = [];
-			const symbols = ['🌸', '💖', '🌸', '💕', '🌸', '❤️', '✨', '🌺'];
+			const symbols = ['🌸', '🌸', '✨', '💕', '🌸', '✨'];
 
 			class Particle {
 				constructor() {
@@ -1737,22 +1737,22 @@ song
 
 				reset(initial = false) {
 					this.x = Math.random() * width;
-					this.y = initial ? Math.random() * height : height + 40;
-					this.size = Math.random() * 16 + 18; // 18px to 34px for crystal clear visibility
-					this.speedY = Math.random() * 0.9 + 0.5;
-					this.speedX = (Math.random() - 0.5) * 0.6;
-					this.opacity = Math.random() * 0.4 + 0.6; // High visibility 0.6 to 1.0
+					this.y = initial ? Math.random() * height : height + 30;
+					this.size = Math.random() * 8 + 10; // Soft & delicate: 10px to 18px
+					this.speedY = Math.random() * 0.35 + 0.2; // Slow, graceful float
+					this.speedX = (Math.random() - 0.5) * 0.3;
+					this.opacity = Math.random() * 0.2 + 0.15; // Soft translucent dreamlike opacity (0.15 - 0.35)
 					this.symbol = symbols[Math.floor(Math.random() * symbols.length)];
 					this.angle = Math.random() * Math.PI * 2;
-					this.angularSpeed = (Math.random() - 0.5) * 0.03;
+					this.angularSpeed = (Math.random() - 0.5) * 0.015;
 				}
 
 				update() {
 					this.y -= this.speedY;
 					this.angle += this.angularSpeed;
-					this.x += Math.sin(this.angle) * 0.7 + this.speedX;
+					this.x += Math.sin(this.angle) * 0.4 + this.speedX;
 
-					if (this.y < -40 || this.x < -40 || this.x > width + 40) {
+					if (this.y < -30 || this.x < -30 || this.x > width + 30) {
 						this.reset(false);
 					}
 				}
@@ -1768,7 +1768,8 @@ song
 				}
 			}
 
-			const particleCount = window.innerWidth < 768 ? 25 : 45;
+			// Minimalistic & elegant particle count
+			const particleCount = window.innerWidth < 768 ? 9 : 15;
 			for (let i = 0; i < particleCount; i++) {
 				particles.push(new Particle());
 			}
