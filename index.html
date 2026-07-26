@@ -1319,7 +1319,7 @@ song
 
 				const likes = localStorage.getItem('likes_' + cardId) || (12 + idx * 3);
 				photoHtml += `
-					<div class="col-md-3 col-sm-6 fadeInUp animated-fast hover-edit-container" id="cardWrap_${cardId}">
+					<div class="col-md-3 col-sm-6 col-xs-6 fadeInUp animated-fast hover-edit-container" id="cardWrap_${cardId}">
 						<button class="hover-delete-btn" title="Hapus Foto Ini" onclick="deleteDefaultItem(event, '${cardId}')">✕</button>
 						<div class="interactive-gallery-card">
 							<button class="card-love-btn" onclick="likeCardItem(event, this, '${cardId}')">❤️ <span class="like-count">${likes}</span></button>
@@ -1338,7 +1338,7 @@ song
 
 				const likes = localStorage.getItem('likes_' + cardId) || (18 + idx * 5);
 				videoHtml += `
-					<div class="col-md-6 col-sm-6 fadeInUp animated-fast hover-edit-container" id="cardWrap_${cardId}">
+					<div class="col-md-6 col-sm-12 col-xs-12 fadeInUp animated-fast hover-edit-container" id="cardWrap_${cardId}">
 						<button class="hover-delete-btn" title="Hapus Video Ini" onclick="deleteDefaultItem(event, '${cardId}')">✕</button>
 						<div class="video-play-overlay" onclick="openCinemaModal('${v.url}', '${v.title}')">
 							<button class="card-love-btn" onclick="likeCardItem(event, this, '${cardId}')">❤️ <span class="like-count">${likes}</span></button>
@@ -1360,7 +1360,7 @@ song
 
 				if (data.type === 'photo') {
 					photoHtml += `
-						<div class="col-md-3 col-sm-6 fadeInUp animated-fast hover-edit-container" id="cardWrap_${id}">
+						<div class="col-md-3 col-sm-6 col-xs-6 fadeInUp animated-fast hover-edit-container" id="cardWrap_${id}">
 							<button class="hover-delete-btn" title="Hapus Foto" onclick="deleteItem('gallery', '${id}')">✕</button>
 							<div class="interactive-gallery-card">
 								<button class="card-love-btn" onclick="likeCardItem(event, this, '${id}')">❤️ <span class="like-count">${likes}</span></button>
@@ -1373,7 +1373,7 @@ song
 				} else if (data.type === 'video') {
 					const vidSrc = escapeHtml(data.url || '');
 					videoHtml += `
-						<div class="col-md-6 col-sm-6 fadeInUp animated-fast hover-edit-container" id="cardWrap_${id}">
+						<div class="col-md-6 col-sm-12 col-xs-12 fadeInUp animated-fast hover-edit-container" id="cardWrap_${id}">
 							<button class="hover-delete-btn" title="Hapus Video" onclick="deleteItem('gallery', '${id}')">✕</button>
 							<div class="video-play-overlay" id="vidCard_${id}" onclick="openCinemaModal(this.querySelector('video source').src || '${vidSrc}', '${escapeHtml(data.title || 'Video Kenangan')}')">
 								<button class="card-love-btn" onclick="likeCardItem(event, this, '${id}')">❤️ <span class="like-count">${likes}</span></button>

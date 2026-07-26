@@ -2314,6 +2314,65 @@ html, body {
 .cinema-like-btn:hover {
   transform: scale(1.08);
   box-shadow: 0 4px 15px rgba(241, 78, 149, 0.5);
+/* Mobile Android Gallery Optimization */
+@media screen and (max-width: 767px) {
+  .display-flex-wrap {
+    margin-left: -6px !important;
+    margin-right: -6px !important;
+  }
+  
+  .display-flex-wrap > [class*='col-'] {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  .interactive-gallery-card {
+    border-radius: 14px !important;
+    margin-bottom: 12px !important;
+    aspect-ratio: 1 / 1 !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06) !important;
+  }
+
+  .video-play-overlay {
+    border-radius: 14px !important;
+    margin-bottom: 16px !important;
+    aspect-ratio: 16 / 9 !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1) !important;
+  }
+
+  .card-love-btn {
+    top: 8px !important;
+    right: 8px !important;
+    padding: 3px 9px !important;
+    font-size: 11px !important;
+    border-radius: 14px !important;
+  }
+
+  .hover-delete-btn {
+    top: 8px !important;
+    left: 8px !important;
+    width: 26px !important;
+    height: 26px !important;
+    line-height: 22px !important;
+    font-size: 12px !important;
+    border-width: 1.5px !important;
+  }
+
+  .video-play-btn-badge {
+    width: 46px !important;
+    height: 46px !important;
+    font-size: 18px !important;
+  }
+
+  .video-card-caption {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .gallery-sub-heading-card span {
+    font-size: 28px !important;
+    padding: 4px 22px !important;
+  }
 }
 
 /*# sourceMappingURL=style.css.map */
