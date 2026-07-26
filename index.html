@@ -55,25 +55,6 @@
 	<![endif]-->
 
 	<script>
-		function toggleMobileMenu(e) {
-			if (e) {
-				if (e.preventDefault) e.preventDefault();
-				if (e.stopPropagation) e.stopPropagation();
-			}
-			var btn = document.getElementById('mobileMenuBtn');
-			var menu = document.getElementById('mobileDropdownMenu');
-			if (!menu || !btn) return false;
-
-			if (menu.classList.contains('active')) {
-				menu.classList.remove('active');
-				btn.classList.remove('active');
-			} else {
-				menu.classList.add('active');
-				btn.classList.add('active');
-			}
-			return false;
-		}
-
 		function scrollToMobileSection(e, sectionId) {
 			if (e) {
 				if (e.preventDefault) e.preventDefault();
@@ -104,7 +85,7 @@
 		    <nav class="navbar navbar-default">
 	        <div class="navbar-header">
 				<!-- Mobile Toggle Menu Button -->
-				<button type="button" id="mobileMenuBtn" onclick="toggleMobileMenu(event);" class="js-qbootstrap-nav-toggle qbootstrap-nav-toggle" aria-label="Toggle Menu">
+				<button type="button" id="mobileMenuBtn" class="js-qbootstrap-nav-toggle qbootstrap-nav-toggle" aria-label="Toggle Menu">
 					<i></i>
 				</button>
 	          	<a class="navbar-brand" href="index.html">Jaja &amp; Dida</a> 

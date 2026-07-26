@@ -73,15 +73,13 @@
 	};
 
 
-	// Burger Menu (Conflict-Free Mobile Toggle)
+	// Burger Menu (100% Instant Single-Tap Toggle)
 	var burgerMenu = function() {
-		var isToggling = false;
-		$(document).on('click touchstart', '#mobileMenuBtn, .js-qbootstrap-nav-toggle', function(event){
-			event.preventDefault();
-			event.stopPropagation();
-			if (isToggling) return false;
-			isToggling = true;
-			setTimeout(function(){ isToggling = false; }, 250);
+		$(document).on('click', '#mobileMenuBtn, .js-qbootstrap-nav-toggle', function(event){
+			if (event) {
+				event.preventDefault();
+				event.stopPropagation();
+			}
 
 			var $btn = $('#mobileMenuBtn');
 			var $menu = $('#mobileDropdownMenu');
