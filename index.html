@@ -1248,12 +1248,17 @@ song
 			const source = document.getElementById('cinemaVideoSource');
 			const title = document.getElementById('cinemaVideoTitle');
 
+			if (!videoUrl || videoUrl === 'undefined' || videoUrl === 'null' || videoUrl.trim() === '') {
+				alert("Video ini tidak dapat diputar karena berkas videonya disimpan di memori lokal HP lain. Untuk bisa diputar di semua HP, gunakan fitur 'Input Link Video' (Google Drive / YouTube / Direct Link MP4).");
+				return;
+			}
+
 			if (modal && player && source) {
 				source.src = videoUrl;
 				player.load();
 				if (title) title.innerText = '🎥 ' + (videoTitle || 'Video Kenangan Jaja & Dida');
 				modal.style.display = 'flex';
-				player.play().catch(e => console.log(e));
+				player.play().catch(e => console.log("Playback error:", e));
 			}
 		};
 
@@ -1371,14 +1376,23 @@ song
 						</div>
 					`;
 				} else if (data.type === 'video') {
-					const vidSrc = escapeHtml(data.url || '');
+					const isIndexedDB = data.storageType === 'indexeddb';
+					const rawUrl = data.url || '';
+					// Ignore expired blob URLs from previous browser sessions
+					const initialSrc = (rawUrl.startsWith('blob:') && !isIndexedDB) ? '' : escapeHtml(rawUrl);
+					const defaultPoster = 'images/me-and-you.jpg';
+
 					videoHtml += `
 						<div class="col-md-6 col-sm-12 col-xs-12 fadeInUp animated-fast hover-edit-container" id="cardWrap_${id}">
 							<button class="hover-delete-btn" title="Hapus Video" onclick="deleteItem('gallery', '${id}')">✕</button>
-							<div class="video-play-overlay" id="vidCard_${id}" onclick="openCinemaModal(this.querySelector('video source').src || '${vidSrc}', '${escapeHtml(data.title || 'Video Kenangan')}')">
+							<div class="video-play-overlay" id="vidCard_${id}" onclick="
+								const srcEl = this.querySelector('video source');
+								const playUrl = (srcEl && srcEl.src) ? srcEl.src : '${initialSrc}';
+								openCinemaModal(playUrl, '${escapeHtml(data.title || 'Video Kenangan')}');
+							">
 								<button class="card-love-btn" onclick="likeCardItem(event, this, '${id}')">❤️ <span class="like-count">${likes}</span></button>
-								<video preload="metadata" muted>
-									<source src="${vidSrc}" type="video/mp4">
+								<video preload="metadata" poster="${defaultPoster}" muted>
+									<source src="${initialSrc}" type="video/mp4">
 								</video>
 								<div class="video-play-btn-badge">▶</div>
 								<div class="video-card-caption">🎬 ${escapeHtml(data.title || 'Video Kenangan')}</div>
@@ -1386,7 +1400,7 @@ song
 						</div>
 					`;
 
-					if (data.storageType === 'indexeddb' && data.localKey) {
+					if (isIndexedDB && data.localKey) {
 						getVideoFromDB(data.localKey).then(blobUrl => {
 							if (blobUrl) {
 								setTimeout(() => {
