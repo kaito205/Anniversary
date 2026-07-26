@@ -1256,17 +1256,20 @@ song
 			const source = document.getElementById('cinemaVideoSource');
 			const title = document.getElementById('cinemaVideoTitle');
 
-			if (!videoUrl || videoUrl === 'undefined' || videoUrl === 'null' || videoUrl.trim() === '') {
-				alert("Video ini tidak dapat diputar karena berkas videonya disimpan di memori lokal HP lain. Untuk bisa diputar di semua HP, gunakan fitur 'Input Link Video' (Google Drive / YouTube / Direct Link MP4).");
+			const cleanUrl = (videoUrl || '').trim();
+			if (!cleanUrl || cleanUrl === 'undefined' || cleanUrl === 'null' || cleanUrl.endsWith('/')) {
+				alert("Video '" + (videoTitle || '') + "' ini tidak dapat diputar karena file fisiknya berada di HP uploader lain. Silakan hapus item ini (tombol ✕) dan upload ulang via link (Google Drive / YouTube) agar bisa diputar di semua HP.");
 				return;
 			}
 
 			if (modal && player && source) {
-				source.src = videoUrl;
+				source.src = cleanUrl;
 				player.load();
 				if (title) title.innerText = '🎥 ' + (videoTitle || 'Video Kenangan Jaja & Dida');
 				modal.style.display = 'flex';
-				player.play().catch(e => console.log("Playback error:", e));
+				player.play().catch(e => {
+					console.log("Playback error:", e);
+				});
 			}
 		};
 
